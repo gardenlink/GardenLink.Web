@@ -1,0 +1,55 @@
+{
+  "name": "GardenLink.Controlador",
+  "version": "0.0.1",
+  "dependencies": {
+    "apidoc": "0.12.1",
+    "async": "^1.4.2",
+    "bower": "^1.7.7",
+    "ejs": ">= 0.0.0",
+    "express": "3.x",
+    "grunt": "^0.4.5",
+    "grunt-bower-task": "^0.4.0",
+    "grunt-contrib-cssmin": "latest",
+    "grunt-contrib-jshint": "latest",
+    "grunt-contrib-less": "latest",
+    "grunt-contrib-uglify": "latest",
+    "grunt-contrib-watch": "latest",
+    "grunt-string-replace": "~1.2.1",
+    "jshint-stylish": "latest",
+    "mocha": "^2.3.4",
+    "moment": "2.9.0",
+    "serve-static": "1.9.2",
+    "supertest": "^1.2.0",
+    "throw.js": "^1.0.0",
+    "underscore": "^1.8.3",
+    "unit.js": "^2.0.0",
+    "winston": "0.9.0"
+  },
+  "apidoc": {
+    "title": "GardenLink.Controlador",
+    "url": "https://github.com/GardenLink/GardenLink.Web.git"
+  },
+  "scripts": {
+    "start": "node Controlador.js release",
+    "test": "mocha test"
+  },
+  "description": "Sistema de control de riego utilizando Raspberry y Arduino",
+  "main": "WebServer.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "keywords": [
+    "Riego",
+    "Huerta",
+    "Planta"
+  ],
+  "author": "Diego Navarro M.",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/GardenLink/GardenLink.Web.git"
+  },
+  "engines": {
+    "node": "4.0"
+  }
+}
