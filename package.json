@@ -18,6 +18,7 @@
     "jshint-stylish": "latest",
     "mocha": "^2.3.4",
     "moment": "2.9.0",
+    "restler": "^3.4.0",
     "serve-static": "1.9.2",
     "supertest": "^1.2.0",
     "throw.js": "^1.0.0",
