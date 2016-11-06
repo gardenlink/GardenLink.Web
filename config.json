@@ -2,7 +2,7 @@
   "debug": {
     "app_host" : "localhost",
     "app_port" : "8090",
-    "api_host" : "localhost",
+    "api_host" : "gardenlink.cl",
     "api_port" : "9000"
   },
   "release": {

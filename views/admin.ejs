@@ -9,38 +9,81 @@
     <script src="/lib/js/ng-admin/ng-admin.min.js"></script>
     <script type="text/javascript">
     var myApp = angular.module('GardenLink', ['ng-admin']);
+
+    //MAPEO DE API https://github.com/marmelab/ng-admin/blob/master/doc/API-mapping.md
+    myApp.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.interceptors.push(function() {
+        return {
+            request: function(config) {
+                // test for /comments?filters={post_id:XXX}
+                console.log(config.url);
+                //console.log("culo " + (/\/temporizadores\/horasactivacion/).test(config.url));
+                //if (/\/temporizadores$/.test(config.url) && config.params.filter) { // && config.params.filter.IdTemporizador) {
+                if ((/\/horasactivacion/).test(config.url)){
+                  //console.log(config.params._filters.IdTemporizador);
+                }
+                if ((/\/horasactivacion/).test(config.url) && config.params._filters && config.params._filters.IdTemporizador) {
+                    config.url = config.url.replace('horasactivacion', 'temporizadores/' + config.params._filters.IdTemporizador + '/horasactivacion');
+                    console.log(config.url);
+                    delete config.params._filters.IdTemporizador;
+                }
+                else {
+                  console.log("no");
+                }
+                return config;
+            },
+        };
+    });
+  }]);
+
+
+
+
     myApp.config(['NgAdminConfigurationProvider', function(NgAdminConfigurationProvider) {
         var nga = NgAdminConfigurationProvider;
         // create an admin application
         var admin = nga.application('GardenLink')
         .baseApiUrl('http://gardenlink.cl:9000/api/v1/')
-        
+
+
         //ESTADOS
         var estados = nga.entity('estados');
         estados.identifier(nga.field('Estado'));
-        
-        
+
+        //HorasActivacion
+        var horasactivacion = nga.entity('horasactivacion');
+
+           //.baseApiUrl('http://localhost:9000/api/v1/temporizadores/horasactivacion')
+        horasactivacion.identifier(nga.field('Id')); // you can optionally customize the identifier used in the api ('id' by default)
+        //horasactivacion.identifier(nga.field('Hora')); // you can optionally customize the identifier used in the api ('id' by default)
+
+
         var TipoDispositivos = [
                              { label: 'Arduino UNO', value: 'Arduino UNO' },
                              { label: 'Arduino MEGA', value: 'Arduino MEGA' },
                              { label: 'Arduino NANO', value: 'Arduino NANO' },
                              { label: 'Arduino LEONARDO', value: 'Arduino LEONARDO' }
                          ];
-        
+
         var TipoSensores = [
 							 { label: 'Temperatura', value: 'Temperatura' },
 							 { label: 'Humedad', value: 'Humedad' },
 							 { label: 'Lluvia', value: 'Lluvia' },
 							 { label: 'PH', value: 'PH' },
 							 { label: 'EC', value: 'EC' },
-							 { label: 'Nivel', value: 'Nivel' }
-                           ];
-        
-        
+							 { label: 'HumedadTierra', value: 'HumedadTierra' },
+               { label: 'FotoSensor', value: 'FotoSensor' },
+               { label: 'CO2', value: 'CO2' },
+               { label: 'Digital', value: 'Digital' },
+               { label: 'Analogo', value: 'Analogo' }
+               ];
+
+
         admin.addEntity(estados);
-        
+        admin.addEntity(horasactivacion);
+
         //DISPOSITIVOS
-        
+
         var dispositivos = nga.entity('dispositivos');
         dispositivos.identifier(nga.field('Id'));
         dispositivos.listView().fields([
@@ -76,14 +119,14 @@
              nga.field('FrecuenciaMuestreo')
              	.validation({ required: true, pattern: '[0-9\.\-_]{1,20}' }),
 			]);
-        
+
         //Update
         dispositivos.editionView().fields(dispositivos.creationView().fields());
-        
+
         admin.addEntity(dispositivos);
-        
+
      // ------- END DISPOSITIVOS -----
-        
+
         //Sensores
         var sensores = nga.entity('sensores');
         sensores.identifier(nga.field('IdSensor'));
@@ -95,6 +138,10 @@
                                         nga.field('Tipo'),
                                         nga.field('Pin'),
                                         nga.field('EsPinAnalogo'),
+                                        nga.field('Pin2'),
+                                        nga.field('EsPinAnalogo2'),
+                                        nga.field('Pin3'),
+                                        nga.field('EsPinAnalogo3'),
                                         nga.field('Habilitado')
                                     ]);
         //CREATE
@@ -109,11 +156,15 @@
                                          nga.field('MarcaModelo'),
                                          nga.field('Tipo','choice').choices([
                                                                              { label: 'Temperatura', value: 'Temperatura' },
-                                                                             { label: 'Humedad', value : 'Humedad' },
-                                                                             { label: 'PH', value : 'PH' },
-                                                                             { label: 'EC', value : 'EC' },
-                                                                             { label: 'Lluvia', value : 'Lluvia' },
-                                                                             { label: 'Luz', value : 'Luz' }
+                                                                            { label: 'Humedad', value: 'Humedad' },
+                                                                            { label: 'Lluvia', value: 'Lluvia' },
+                                                                            { label: 'PH', value: 'PH' },
+                                                                            { label: 'EC', value: 'EC' },
+                                                                            { label: 'HumedadTierra', value: 'HumedadTierra' },
+                                                                             { label: 'FotoSensor', value: 'FotoSensor' },
+                                                                             { label: 'CO2', value: 'CO2' },
+                                                                             { label: 'Digital', value: 'Digital' },
+                                                                             { label: 'Analogo', value: 'Analogo' }
                                                                             ]).validation({required : true}),
                                          nga.field('Pin')
                                          	.validation({ required: true, pattern: '[0-9\.\-_]{1,20}' }),
@@ -122,22 +173,38 @@
                                                                                      { label: 'false', value: false }
                                                                                  ])
                                                                             .validation({required: true}),
+
+                                          nga.field('Pin2')
+                                           .validation({ required: false, pattern: '[0-9\.\-_]{1,20}' }),
+                                          nga.field('EsPinAnalogo2','choice').choices([
+                                                                                      { label: 'true', value: true },
+                                                                                      { label: 'false', value: false }
+                                                                                  ])
+                                                                             .validation({required: false}),
+
+                                           nga.field('Pin3')
+                                            .validation({ required: false, pattern: '[0-9\.\-_]{1,20}' }),
+                                           nga.field('EsPinAnalogo3','choice').choices([
+                                                                                       { label: 'true', value: true },
+                                                                                       { label: 'false', value: false }
+                                                                                   ])
+                                                                              .validation({required: false}),
                                          nga.field('Habilitado', 'choice').choices([
                                                                                     { label: 'true', value: true },
                                                                                     { label: 'false', value: false }
                                                                                 ])
                                                                           .validation({required: true})
                             			]);
-        
+
         //Update
         sensores.editionView().fields(sensores.creationView().fields());
-      
+
         admin.addEntity(sensores);
-        
+
         // ------- END SENSORES -----
-        
+
         //Relay
-        
+
         var relays = nga.entity('relays');
         relays.identifier(nga.field('IdRelay'));
         relays.listView().fields([
@@ -193,18 +260,18 @@
                                                                               ])
                                                                        .validation({required: true})
                             			]);
-        
+
         //Update
         relays.editionView().fields(relays.creationView().fields());
-      
+
         admin.addEntity(relays);
-        
+
      // ------- END RELAYS -----
-     
-     
-        
+
+
+
         //Motores
-        
+
         var motores = nga.entity('motores');
         motores.identifier(nga.field('IdMotor'));
         motores.listView().fields([
@@ -264,19 +331,19 @@
                                                                            ])
                                                                      .validation({required: true})
                             			]);
-        
+
         //Update
         motores.editionView().fields(motores.creationView().fields());
-      
+
         admin.addEntity(motores);
-        
+
      // ------- END MOTORES -----
-     
+
      //TipoActuadores
-        
+
         var tipoactuadores = nga.entity('tipoactuadores');
         tipoactuadores.identifier(nga.field('IdTipoActuador'));
-        
+
         tipoactuadores.listView().fields([
                                         nga.field('IdTipoActuador').isDetailLink(true),
                                         nga.field('Descripcion')
@@ -287,20 +354,20 @@
                                				.validation({ required: true, pattern: '[0-9\.\-_]{1,20}' }),
                                         nga.field('Descripcion')
                             			]);
-        
+
         //Update
         tipoactuadores.editionView().fields(tipoactuadores.creationView().fields());
-      
+
         admin.addEntity(tipoactuadores);
-        
+
      // ------- END TIPOACTUADORES
-     
-     
+
+
      //Temporizador
-        
+
         var temporizadores = nga.entity('temporizadores');
         temporizadores.identifier(nga.field('IdTemporizador'));
-        
+
         temporizadores.listView().fields([
                                         nga.field('IdTemporizador').isDetailLink(true),
                                         nga.field('IdDispositivo'),
@@ -309,7 +376,6 @@
                                         nga.field('Descripcion'),
                                         nga.field('DuracionMinutos'),
                                         nga.field('NumeroDias'),
-                                        nga.field('HorasActivacion'),
                                         nga.field('Habilitado')
                                     ]);
         //CREATE
@@ -338,18 +404,19 @@
                                                                               ])
                                                                         .validation({required: true})
                             			]);
-        
+
         //Update
         temporizadores.editionView().fields(temporizadores.creationView().fields());
-      
+
+
         admin.addEntity(temporizadores);
-        
+
      // ------- END TEMPORIZADORES -----
-        
-  		
-        
-        
-        
+
+
+
+
+
         //MENU:
         	/*
         admin.menu(nga.menu()
@@ -357,8 +424,8 @@
         .addChild(nga.menu(sensores).icon('<span class="glyphicon glyphicon-pencil"></span>'))
     	);
         */
-        
-        
+
+
         nga.configure(admin);
     }]);
     </script>
