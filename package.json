@@ -31,7 +31,7 @@
     "url": "https://github.com/GardenLink/GardenLink.Web.git"
   },
   "scripts": {
-    "start": "node Controlador.js release",
+    "start": "node WebServer.js release",
     "test": "mocha test"
   },
   "description": "Sistema de control de riego utilizando Raspberry y Arduino",
